@@ -1,0 +1,28 @@
+
+--- Testing /api/admin/crud/users ---
+✓ GET /users with ?page=1&pageSize=5&sort=id:desc&q=test -> Status: 200, Total: 0
+  Data array length: 0
+
+--- Testing /api/admin/crud/periods ---
+✓ GET /periods with ?page=1&pageSize=5&sort=id:desc&q=test -> Status: 200, Total: 1
+  Data array length: 1
+
+--- Testing /api/admin/crud/topics ---
+✓ GET /topics with ?page=1&pageSize=5&sort=id:desc&q=test -> Status: 200, Total: 0
+  Data array length: 0
+
+--- Testing /api/admin/crud/indicators ---
+✓ GET /indicators with ?page=1&pageSize=5&sort=id:desc&q=test -> Status: 200, Total: 1
+  Data array length: 1
+
+--- Testing /api/admin/crud/assignments ---
+✓ GET /assignments with ?page=1&pageSize=5&sort=id:desc&q=test -> Status: 200, Total: 2
+  Data array length: 2
+
+--- Testing /api/admin/crud/results ---
+✓ GET /results with ?page=1&pageSize=5&sort=id:desc&q=test -> Status: 200, Total: 1
+  Data array length: 1
+
+--- Testing /api/admin/crud/evidence ---
+✓ GET /evidence with ?page=1&pageSize=5&sort=id:desc&q=test -> Status: 200, Total: 0
+  Data array length: 0
