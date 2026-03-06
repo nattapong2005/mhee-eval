@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Swal from 'sweetalert2';
+import Swal from '@/utils/swal';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { login } from '@/services/auth';

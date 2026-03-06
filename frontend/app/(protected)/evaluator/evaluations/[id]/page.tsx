@@ -11,6 +11,7 @@ export default function EvaluatorAssignmentsPage({ params }: { params: Promise<{
     const evaluationId = parseInt(resolvedParams.id);
     const [evaluation, setEvaluation] = useState<any>(null);
     const [assignments, setAssignments] = useState<any[]>([]);
+    const [evidenceList, setEvidenceList] = useState<any[]>([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -19,6 +20,7 @@ export default function EvaluatorAssignmentsPage({ params }: { params: Promise<{
                 if (res.status === 'success') {
                     setEvaluation(res.data.evaluation);
                     setAssignments(res.data.assignments || []);
+                    setEvidenceList(res.data.evidence || []);
                 }
             } catch (err) {
                 console.error(err);
@@ -60,11 +62,31 @@ export default function EvaluatorAssignmentsPage({ params }: { params: Promise<{
                                 const progress = totalIndicators > 0 ? (scoredCount / totalIndicators) * 100 : 0;
                                 const isCompleted = scoredCount === totalIndicators && totalIndicators > 0;
 
+                                // Check evidence for this evaluatee
+                                const indicatorsWithEvidenceReq = evaluation.topics?.flatMap((t: any) => t.indicators?.filter((i: any) => i.requireEvidence)) || [];
+                                const evaluateeEvidence = evidenceList.filter(e => e.evaluateeId === assignment.evaluateeId);
+                                const evidenceCount = indicatorsWithEvidenceReq.filter((ind: any) => evaluateeEvidence.some(e => e.indicatorId === ind.id)).length;
+                                const totalRequiredEvidence = indicatorsWithEvidenceReq.length;
+                                const allEvidenceUploaded = evidenceCount === totalRequiredEvidence;
+
                                 return (
                                     <tr key={assignment.id} className="hover:bg-gray-800 transition-colors">
                                         <td className="px-6 py-4 text-sm font-medium text-white">{String(index + 1).padStart(2, '0')}</td>
                                         <td className="px-6 py-4 text-sm font-medium text-white">{assignment.evaluatee?.name}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-400">รอตรวจสอบหลักฐาน</td>
+                                        <td className="px-6 py-4 text-sm">
+                                            {totalRequiredEvidence > 0 ? (
+                                                <div className="flex flex-col gap-1">
+                                                    <span className={`font-medium ${allEvidenceUploaded ? 'text-emerald-400' : 'text-amber-400'}`}>
+                                                        {allEvidenceUploaded ? 'แนบครบแล้ว' : 'ยังแนบไม่ครบ'}
+                                                    </span>
+                                                    <span className="text-[10px] text-gray-500">
+                                                        ({evidenceCount}/{totalRequiredEvidence} รายการ)
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-gray-500 italic">ไม่ต้องแนบหลักฐาน</span>
+                                            )}
+                                        </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-full bg-gray-800 rounded-full h-1.5 min-w-[100px] max-w-[200px] overflow-hidden">

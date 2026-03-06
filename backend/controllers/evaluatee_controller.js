@@ -110,7 +110,7 @@ exports.uploadEvidence = async (req, res, next) => {
             evidence = await prisma.evidence.update({
                 where: { id: existingEvidence.id },
                 data: {
-                    filePath: req.file.path,
+                    filePath: `uploads/${req.file.filename}`,
                     mimeType: req.file.mimetype,
                     sizeBytes: req.file.size
                 }
@@ -120,7 +120,7 @@ exports.uploadEvidence = async (req, res, next) => {
                 data: {
                     indicatorId: parseInt(indicatorId),
                     evaluateeId,
-                    filePath: req.file.path,
+                    filePath: `uploads/${req.file.filename}`,
                     mimeType: req.file.mimetype,
                     sizeBytes: req.file.size
                 }

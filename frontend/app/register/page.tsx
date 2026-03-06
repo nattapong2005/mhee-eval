@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { register, getDepartments } from '../../services/auth';
-import Swal from 'sweetalert2';
+import Swal from '@/utils/swal';
 import Link from 'next/link';
 import { Department } from '../../types';
 

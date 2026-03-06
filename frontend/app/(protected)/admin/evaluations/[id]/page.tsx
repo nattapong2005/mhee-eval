@@ -9,7 +9,7 @@ import {
 } from '../../../../../services/admin';
 import BackButton from '../../../../../components/BackButton';
 import { Plus, Trash, Edit, RefreshCw, Layers, Users, BarChart3, ChevronRight, CheckCircle2, AlertCircle, FileText, Settings2, Info } from 'lucide-react';
-import Swal from 'sweetalert2';
+import Swal from '@/utils/swal';
 
 export default function AdminEvaluationDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = use(params);

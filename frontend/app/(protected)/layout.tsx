@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import Sidebar from '../../components/Sidebar';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import Swal from 'sweetalert2';
+import Swal from '@/utils/swal';
 
 export default function ProtectedLayout({
     children,

@@ -1,1 +1,0 @@
-Invalid `prisma[modelName].delete()` invocation in E:\Competency\real\backend\controllers\crud.controller.js:98:39 95 exports.delete = (modelName) => async (req, res, next) => { 96 try { 97 const id = parseInt(req.params.id); → 98 await prisma[modelName].delete( Foreign key constraint violated on the fields: (`evaluatorId`)

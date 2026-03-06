@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from 'react';
 import { getMyEvaluationDetails, uploadEvidence } from '../../../../../services/evaluatee';
 import BackButton from '../../../../../components/BackButton';
-import Swal from 'sweetalert2';
+import Swal from '@/utils/swal';
 import { Upload, FileText, CheckCircle2, Award, Info, AlertCircle, ClipboardList } from 'lucide-react';
 
 export default function EvaluateeEvaluationDetailsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -164,9 +164,19 @@ export default function EvaluateeEvaluationDetailsPage({ params }: { params: Pro
                                                         {indicator.description && <p className="text-sm text-gray-400 mt-2">{indicator.description}</p>}
 
                                                         {evidence && (
-                                                            <div className="mt-3 flex items-center gap-2 text-sm text-gray-400 bg-gray-950 p-3 rounded-lg border border-gray-800 w-fit">
-                                                                <FileText size={16} className="text-gray-500" />
-                                                                <span>ตรวจสอบไฟล์หลักฐานแนบเรียบร้อยแล้ว</span>
+                                                            <div className="mt-3 flex flex-col gap-2">
+                                                                <div className="flex items-center gap-2 text-sm text-gray-400 bg-gray-950 p-3 rounded-lg border border-gray-800 w-fit">
+                                                                    <FileText size={16} className="text-gray-500" />
+                                                                    <span>ตรวจสอบไฟล์หลักฐานแนบเรียบร้อยแล้ว</span>
+                                                                </div>
+                                                                <a
+                                                                    href={`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api').replace('/api', '')}/${evidence.filePath.replace(/\\/g, '/').replace(/^.*(?=uploads\/)/, '')}`}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="text-xs text-primary-400 hover:text-primary-300 underline ml-1 w-fit"
+                                                                >
+                                                                    คลิกเพื่อดูไฟล์ที่อัปโหลด
+                                                                </a>
                                                             </div>
                                                         )}
                                                     </div>

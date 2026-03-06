@@ -7,7 +7,7 @@ import { useAuth } from '../../../../contexts/AuthContext';
 import { User, Department } from '../../../../types';
 import BackButton from '../../../../components/BackButton';
 import { Edit, Trash, Plus, X, Users } from 'lucide-react';
-import Swal from 'sweetalert2';
+import Swal from '@/utils/swal';
 
 export default function AdminUsersPage() {
     const { user: currentUser } = useAuth();

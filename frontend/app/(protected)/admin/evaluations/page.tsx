@@ -6,7 +6,7 @@ import { Evaluation } from '../../../../types';
 import BackButton from '../../../../components/BackButton';
 import Link from 'next/link';
 import { Edit, Trash, Eye, Plus, X, ClipboardList } from 'lucide-react';
-import Swal from 'sweetalert2';
+import Swal from '@/utils/swal';
 
 export default function AdminEvaluationsPage() {
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);

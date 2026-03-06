@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Kanit } from "next/font/google";
+import "@sweetalert2/theme-dark/dark.css";
 import "./globals.css";
 import { Providers } from "./providers";
 

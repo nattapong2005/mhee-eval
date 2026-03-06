@@ -3,13 +3,14 @@
 import { useState, useEffect, use } from 'react';
 import { getAssignmentForEvaluator, giveScore } from '../../../../../services/evaluator';
 import BackButton from '../../../../../components/BackButton';
-import Swal from 'sweetalert2';
+import Swal from '@/utils/swal';
 import { Save, CheckCircle2, FileText, ExternalLink, AlertCircle } from 'lucide-react';
 
 export default function EvaluatorAssignmentPage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = use(params);
     const assignmentId = parseInt(resolvedParams.id);
     const [assignment, setAssignment] = useState<any>(null);
+    const [evidenceList, setEvidenceList] = useState<any[]>([]);
     const [scores, setScores] = useState<Record<number, number>>({});
     const [saving, setSaving] = useState(false);
 
@@ -19,6 +20,7 @@ export default function EvaluatorAssignmentPage({ params }: { params: Promise<{ 
                 const res = await getAssignmentForEvaluator(assignmentId);
                 if (res.status === 'success') {
                     setAssignment(res.data.assignment);
+                    setEvidenceList(res.data.evidence || []);
 
                     // pre-load existing scores
                     const initialScores: Record<number, number> = {};
@@ -56,8 +58,7 @@ export default function EvaluatorAssignmentPage({ params }: { params: Promise<{ 
         // Validation: Check if all indicators with requireEvidence have evidence before scoring
         const indicators = evaluation?.topics?.flatMap((t: any) => t.indicators) || [];
         const unscoredRequired = indicators.filter((ind: any) => {
-            const result = resultsMap[ind.id];
-            const hasEvidence = result && result.evidenceUrl;
+            const hasEvidence = evidenceList.some(e => e.indicatorId === ind.id);
             // If evidence is required, it MUST have evidence to be scored
             if (ind.requireEvidence && !hasEvidence && scores[ind.id] !== undefined) {
                 return true;
@@ -110,8 +111,8 @@ export default function EvaluatorAssignmentPage({ params }: { params: Promise<{ 
                         <div className="p-6">
                             {topic.indicators?.map((indicator: any, indIndex: number) => {
                                 const currentScore = scores[indicator.id];
-                                const result = resultsMap[indicator.id];
-                                const hasEvidence = result && result.evidenceUrl;
+                                const evidence = evidenceList.find(e => e.indicatorId === indicator.id);
+                                const hasEvidence = !!evidence;
                                 const isDisabled = indicator.requireEvidence && !hasEvidence;
 
                                 return (
@@ -135,9 +136,9 @@ export default function EvaluatorAssignmentPage({ params }: { params: Promise<{ 
                                                 <div className={`p-3 rounded-lg border ${hasEvidence ? 'bg-emerald-950 border-emerald-800' : 'bg-slate-50 border-slate-200'}`}>
                                                     <p className="text-xs font-bold text-slate-400 uppercase mb-2">หลักฐานประกอบ</p>
                                                     {hasEvidence ? (
-                                                        <a 
-                                                            href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}${result.evidenceUrl}`} 
-                                                            target="_blank" 
+                                                        <a
+                                                            href={`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api').replace('/api', '')}/${evidence.filePath.replace(/\\/g, '/').replace(/^.*(?=uploads\/)/, '')}`}
+                                                            target="_blank"
                                                             rel="noopener noreferrer"
                                                             className="flex items-center gap-2 text-emerald-300 hover:text-emerald-200 font-medium text-sm group"
                                                         >
@@ -161,7 +162,7 @@ export default function EvaluatorAssignmentPage({ params }: { params: Promise<{ 
                                                     <AlertCircle size={14} /> * ต้องแนบหลักฐานก่อนจึงจะสามารถให้คะแนนได้
                                                 </p>
                                             )}
-                                            
+
                                             <div className={`${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}>
                                                 {indicator.type === 'SCALE_1_4' && (
                                                     <div className="flex flex-wrap gap-3">
