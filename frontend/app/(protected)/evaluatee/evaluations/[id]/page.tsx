@@ -94,6 +94,24 @@ export default function EvaluateeEvaluationDetailsPage({ params }: { params: Pro
         resultsMap[r.indicatorId] = r;
     });
 
+    // Calculate scores
+    let totalRawScore = 0;
+    let maxRawScore = 0;
+    let totalWeightedScore = 0;
+
+    evaluation.topics?.forEach((topic: any) => {
+        topic.indicators?.forEach((ind: any) => {
+            const maxIndScore = ind.type === 'SCALE_1_4' ? 4 : 1;
+            maxRawScore += maxIndScore;
+
+            const result = resultsMap[ind.id];
+            if (result && result.score !== null && result.score !== undefined) {
+                totalRawScore += result.score;
+                totalWeightedScore += (result.score / maxIndScore) * (ind.weight || 0);
+            }
+        });
+    });
+
     return (
         <div className="space-y-6 pb-12 font-sans">
             <div>
@@ -108,27 +126,48 @@ export default function EvaluateeEvaluationDetailsPage({ params }: { params: Pro
                         <p className="flex items-center gap-1.5"><span className="text-gray-500">ระยะเวลา:</span> <span className="font-medium text-gray-200">{new Date(evaluation.startAt).toLocaleDateString()} - {new Date(evaluation.endAt).toLocaleDateString()}</span></p>
                     </div>
                 </div>
-                <div className="flex flex-col items-end shrink-0">
+                <div className="flex flex-col items-end shrink-0 gap-2">
                     {isCompleted ? (
-                        <div className="bg-emerald-950 text-emerald-300 px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 border border-emerald-900">
-                            <Award size={16} /> ประเมินสิ้นสุดแล้ว
+                        <div className="flex flex-col items-end gap-1">
+                            <div className="bg-emerald-950 text-emerald-300 px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 border border-emerald-900">
+                                <Award size={16} /> ประเมินสิ้นสุดแล้ว
+                            </div>
+                            <div className="text-xl font-bold text-emerald-400">
+                                {totalWeightedScore.toFixed(2)}% <span className="text-sm font-normal text-gray-500">/ 100%</span>
+                            </div>
                         </div>
                     ) : (
-                        <div className="bg-gray-800 text-gray-200 px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5">
-                            <Info size={16} /> อยู่ระหว่างการประเมิน ({scoredCount}/{totalIndicators})
+                        <div className="flex flex-col items-end gap-1">
+                            <div className="bg-gray-800 text-gray-200 px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 border border-gray-700">
+                                <Info size={16} /> อยู่ระหว่างการประเมิน ({scoredCount}/{totalIndicators})
+                            </div>
+                            {scoredCount > 0 && (
+                                <div className="text-lg font-bold text-gray-300">
+                                    {totalWeightedScore.toFixed(2)}% <span className="text-sm font-normal text-gray-500">คะแนนเฉลี่ย</span>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
             </div>
 
             {isCompleted && (
-                <div className="bg-primary-950 border border-primary-900 p-4 rounded-lg flex items-start gap-3">
-                    <div className="p-2 bg-primary-900 rounded-md text-primary-400 shrink-0">
-                        <Award size={18} />
+                <div className="bg-primary-950 border border-primary-900 p-6 rounded-lg flex items-center justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                        <div className="p-3 bg-primary-900 rounded-xl text-primary-400 shrink-0">
+                            <Award size={24} />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-primary-100 text-lg">สรุปผลการประเมิน</h3>
+                            <p className="text-primary-300 text-sm mt-1">ผู้ประเมินได้ทำการให้คะแนนครบทุกตัวชี้วัดแล้ว สรุปคะแนนประเมินของคุณมีรายละเอียดดังนี้</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 className="font-semibold text-primary-200">สรุปผลการประเมิน</h3>
-                        <p className="text-primary-300 text-sm mt-0.5">ผู้ประเมินได้ทำการให้คะแนนครบทุกตัวชี้วัดแล้ว คุณสามารถตรวจสอบคะแนนได้ในแต่ละหัวข้อด้านล่าง</p>
+                    <div className="text-right">
+                        <div className="text-sm text-primary-400 font-medium mb-1">คะแนนรวมทั้งหมด (Weighted)</div>
+                        <div className="text-4xl font-black text-white">
+                            {totalWeightedScore.toFixed(2)}<span className="text-xl font-medium text-primary-400 ml-1">%</span>
+                        </div>
+                        <div className="text-xs text-primary-500 mt-1">จากคะแนนดิบ {totalRawScore} / {maxRawScore}</div>
                     </div>
                 </div>
             )}
