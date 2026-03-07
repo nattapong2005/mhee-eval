@@ -4,7 +4,7 @@ import { useState, useEffect, use } from 'react';
 import { getAssignmentForEvaluator, giveScore } from '../../../../../services/evaluator';
 import BackButton from '../../../../../components/BackButton';
 import Swal from '@/utils/swal';
-import { Save, CheckCircle2, FileText, ExternalLink, AlertCircle } from 'lucide-react';
+import { Save, CheckCircle2, FileText, ExternalLink, AlertCircle, Award } from 'lucide-react';
 
 export default function EvaluatorAssignmentPage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = use(params);
@@ -54,6 +54,28 @@ export default function EvaluatorAssignmentPage({ params }: { params: Promise<{ 
         setScores(prev => ({ ...prev, [indicatorId]: score }));
     };
 
+    // Calculate scores dynamically
+    let totalRawScore = 0;
+    let maxRawScore = 0;
+    let totalWeightedScore = 0;
+
+    evaluation?.topics?.forEach((topic: any) => {
+        topic.indicators?.forEach((ind: any) => {
+            const maxIndScore = ind.type === 'SCALE_1_4' ? 4 : 1;
+            maxRawScore += maxIndScore;
+
+            const score = scores[ind.id];
+            if (score !== undefined) {
+                totalRawScore += score;
+                totalWeightedScore += (score / maxIndScore) * (ind.weight || 0);
+            }
+        });
+    });
+
+    const totalIndicators = evaluation?.topics?.reduce((acc: number, topic: any) => acc + (topic.indicators?.length || 0), 0) || 0;
+    const scoredCount = Object.keys(scores).length;
+    const isCompleted = scoredCount === totalIndicators && totalIndicators > 0;
+
     const handleSubmit = async () => {
         // Validation: Check if all indicators with requireEvidence have evidence before scoring
         const indicators = evaluation?.topics?.flatMap((t: any) => t.indicators) || [];
@@ -92,15 +114,56 @@ export default function EvaluatorAssignmentPage({ params }: { params: Promise<{ 
         <div>
             <div className="mb-6"><BackButton label="รายการประเมินที่ได้รับมอบหมาย" /></div>
 
-            <div className="bg-gray-900 p-6 rounded-xl shadow-sm border border-slate-200 mb-6 flex justify-between items-center">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-6 flex justify-between items-center">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-800">ประเมิน {evaluatee?.name}</h1>
                     <p className="text-sm text-slate-500 mt-1">แบบประเมิน: {evaluation?.name}</p>
                 </div>
                 <div className="text-right">
-                    <span className="text-xs font-bold text-amber-400 bg-amber-950 px-3 py-1 rounded-full border border-amber-900 uppercase tracking-wider">In Progress</span>
+                    {isCompleted ? (
+                        <div className="flex flex-col items-end gap-1">
+                            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 uppercase tracking-wider flex items-center gap-1.5">
+                                <CheckCircle2 size={14} /> ประเมินครบแล้ว
+                            </span>
+                            <div className="text-xl font-bold text-emerald-600 mt-1">
+                                {totalWeightedScore.toFixed(2)}% <span className="text-sm font-normal text-slate-500">/ 100%</span>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-end gap-1">
+                            <span className="text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-200 uppercase tracking-wider">
+                                In Progress ({scoredCount}/{totalIndicators})
+                            </span>
+                            {scoredCount > 0 && (
+                                <div className="text-sm font-bold text-slate-600 mt-1">
+                                    {totalWeightedScore.toFixed(2)}% <span className="text-xs font-normal text-slate-500">คะแนนเฉลี่ย</span>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
+
+            {isCompleted && (
+                <div className="bg-emerald-50 border border-emerald-200 p-6 rounded-xl flex items-center justify-between gap-4 mb-6">
+                    <div className="flex items-start gap-4">
+                        <div className="p-3 bg-emerald-100 rounded-xl text-emerald-600 shrink-0">
+                            <Award size={24} />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-emerald-800 text-lg">สรุปผลการประเมิน</h3>
+                            <p className="text-emerald-700 text-sm mt-1">คุณได้ทำการให้คะแนนครบทุกตัวชี้วัดแล้ว สามารถตรวจสอบและกดบันทึกผลการประเมินได้</p>
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <div className="text-sm text-emerald-600 font-medium mb-1">คะแนนรวมทั้งหมด (Weighted)</div>
+                        <div className="text-4xl font-black text-emerald-700">
+                            {totalWeightedScore.toFixed(2)}<span className="text-xl font-medium text-emerald-600 ml-1">%</span>
+                        </div>
+                        <div className="text-xs text-emerald-600 mt-1">จากคะแนนดิบ {totalRawScore} / {maxRawScore}</div>
+                    </div>
+                </div>
+            )}
 
             <div className="space-y-6">
                 {evaluation?.topics?.map((topic: any, index: number) => (
